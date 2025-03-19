@@ -27,8 +27,28 @@ with st.sidebar:
     # اختيار الخدمات المفضلة
     services_file = "merged_places.xlsx"
     df_services = pd.read_excel(services_file, sheet_name='Sheet1')
-    service_types = df_services['Category'].unique().tolist()
-    selected_services = st.multiselect("اختر الخدمات المفضلة:", service_types, default=[service_types[0]])
+    
+    # تحويل أسماء الفئات إلى العربية
+    category_translation = {
+        "malls": "المولات",
+        "entertainment": "الترفيه",
+        "hospitals_clinics": "المستشفيات والعيادات",
+        "gyms": "الصالات الرياضية",
+        "groceries": "البقالات",
+        "bus": "محطات الباص",
+        "metro": "محطات المترو",
+        "cafes_bakeries": "المقاهي والمخابز",
+        "pharmacies": "الصيدليات",
+        "restaurants": "المطاعم"
+    }
+    
+    df_services['Category_Arabic'] = df_services['Category'].map(category_translation)
+    service_types = df_services['Category_Arabic'].dropna().unique().tolist()
+    
+    selected_services_ar = st.multiselect("اختر الخدمات المفضلة:", service_types, default=service_types[:1] if service_types else [])
+    
+    # تحويل الاختيارات العربية إلى الأصلية لاستخدامها في التصفية
+    selected_services = [key for key, value in category_translation.items() if value in selected_services_ar]
 
 # تحميل بيانات الشقق
 apartments_file = "Cleaned_airbnb_v1.xlsx"
