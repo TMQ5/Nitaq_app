@@ -35,7 +35,7 @@ apartments_file = "Cleaned_airbnb_v1.xlsx"
 df_apartments = pd.read_excel(apartments_file, sheet_name='Sheet1')
 
 # الاحتفاظ فقط بالأعمدة المهمة
-df_services = df_services[['Name', 'Type_of_Utility', 'Longitude', 'Latitude']]
+df_services = df_services[['Name', 'Category', 'Longitude', 'Latitude']]
 df_apartments = df_apartments[['room_id', 'name', 'price_per_month', 'rating', 'latitude', 'longitude', 'URL']]
 
 st.markdown(
@@ -50,7 +50,7 @@ st.markdown(
 )
 
 # تصفية الخدمات بناءً على اختيار المستخدم
-filtered_services = df_services[df_services["Type_of_Utility"].isin(selected_services)]
+filtered_services = df_services[df_services["Category"].isin(selected_services)]
 
 if not filtered_services.empty:
     # بناء شجرة KDTree لتسريع البحث عن الشقق القريبة
