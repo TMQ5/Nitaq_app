@@ -345,6 +345,67 @@ if "malls" in selected_services:
 
 
 
+# 🔹 تصفية بيانات محلات البقالة والسوبرماركت
+df_groceries = df_services[df_services["Category"] == "groceries"]
+
+# 🔹 حساب المسافات لمحلات السوبرماركت
+filtered_groceries = []
+for _, row in df_groceries.iterrows():
+    grocery_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, grocery_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_groceries.append(row_dict)
+
+filtered_groceries_df = pd.DataFrame(filtered_groceries)
+
+# 🔹 عرض إحصائيات السوبرماركت فقط إذا تم اختيارها
+if "groceries" in selected_services:
+    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+
+    with col1:
+        st.markdown(f"### 🛒 عدد محلات البقالة داخل {radius_km} كم: **{len(filtered_groceries_df)}**")
+
+        if filtered_groceries_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي محلات بقالة أو سوبرماركت داخل هذا النطاق!**  
+                💀 **إذا كنت من النوع اللي يشتري أكل بيومه، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                **يعني إذا خلصت البيض فجأة؟ لازم مشوار عشان تجيب كرتون جديد!** 🥚🚗
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_groceries_df) == 1:
+            grocery = filtered_groceries_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد محلات البقالة في هذا النطاق: 1 فقط!**  
+                📍 **المحل الوحيد هنا هو:** `{grocery['Name']}` وتبعد عنك **{grocery['المسافة (كم)']} كم!**  
+                🛒 **يعني إذا كان زحمة، أو سكّر بدري، فأنت في ورطة! جهّز نفسك لطلب التوصيل أو خزن الأكل مسبقًا!** 😬  
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد محلات البقالة داخل {radius_km} كم: {len(filtered_groceries_df)} 🛒🥦**  
+                👏 **ما يحتاج تشيل هم الأكل، عندك محلات كثيرة تقدر تشتري منها أي وقت!** 😉  
+                📍 **لو نسيت تشتري خبز، ما يحتاج مشوار طويل، أقرب بقالة عندك!** 🍞🥛
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🛒 أقرب 3 محلات بقالة إليك:")
+            closest_groceries = filtered_groceries_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_groceries.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع محلات البقالة**
+            if len(filtered_groceries_df) > 3:
+                with st.expander("🔍 عرض جميع محلات البقالة"):
+                    st.dataframe(filtered_groceries_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة الخاصة بالسوبرماركت
+        st.image("supermarket.webp", use_container_width=True)
+
+
+
 # -------------------------------------------------------------
 # 🔹 تحميل بيانات الشقق
 apartments_file = "Cleaned_airbnb_v1.xlsx"
