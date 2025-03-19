@@ -105,10 +105,22 @@ if "pharmacies" in selected_services:
         # تحميل الصورة
         st.image("Pharmacy.webp", use_container_width=True)
 
-# 🔹 عرض إحصائيات محطات المترو فقط إذا تم اختيارها
 if "metro" in selected_services:
-    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
-    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+    # 🔹 تصفية محطات المترو داخل النطاق المحدد
+    filtered_metro = []
+    for _, row in df_services[df_services["Category"] == "metro"].iterrows():
+        metro_location = (row["Latitude"], row["Longitude"])
+        distance = geodesic(user_location, metro_location).km
+        if distance <= radius_km:
+            row_dict = row.to_dict()
+            row_dict["المسافة (كم)"] = round(distance, 2)
+            filtered_metro.append(row_dict)
+
+    # 🔹 تحويل القائمة إلى DataFrame
+    filtered_metro_df = pd.DataFrame(filtered_metro)
+
+    # 🔹 الآن يمكن استخدام `filtered_metro_df` بأمان
+    col1, col2 = st.columns([3, 1])
 
     with col1:
         st.markdown(f"### 🚉 عدد محطات المترو داخل {radius_km} كم: **{len(filtered_metro_df)}**")
@@ -149,7 +161,6 @@ if "metro" in selected_services:
     with col2:
         # تحميل صورة لمحطات المترو
         st.image("Metro.webp", use_container_width=True)
-
 
 # 🔹 تحميل بيانات الشقق
 apartments_file = "Cleaned_airbnb_v1.xlsx"
