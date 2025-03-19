@@ -3,6 +3,7 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from scipy.spatial import cKDTree
+from geopy.distance import geodesic
 from PIL import Image
 
 # إعداد صفحة التطبيق
@@ -23,6 +24,7 @@ with st.sidebar:
     # إدخال إحداثيات الموقع يدويًا
     user_lat = st.number_input("خط العرض:", value=24.7136, format="%.6f")
     user_lon = st.number_input("خط الطول:", value=46.6753, format="%.6f")
+    user_location = (user_lat, user_lon)
     
     # اختيار الخدمات المفضلة
     services_file = "merged_places.xlsx"
@@ -54,7 +56,6 @@ with st.sidebar:
 apartments_file = "Cleaned_airbnb_v1.xlsx"
 df_apartments = pd.read_excel(apartments_file, sheet_name='Sheet1', engine="openpyxl")
 
-
 # الاحتفاظ فقط بالأعمدة المهمة
 df_services = df_services[['Name', 'Category', 'Longitude', 'Latitude']]
 df_apartments = df_apartments[['room_id', 'name', 'price_per_month', 'rating', 'latitude', 'longitude', 'URL']]
@@ -73,24 +74,35 @@ st.markdown(
 # تصفية الخدمات بناءً على اختيار المستخدم
 filtered_services = df_services[df_services["Category"].isin(selected_services)]
 
-if not filtered_services.empty:
-    # بناء شجرة KDTree لتسريع البحث عن الشقق القريبة
-    apartments_tree = cKDTree(df_apartments[["latitude", "longitude"]].values)
+# حساب المسافات بين الموقع المحدد والخدمات
+filtered_locations = []
+for _, row in filtered_services.iterrows():
+    service_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, service_location).km  
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_locations.append(row_dict)
 
+filtered_services_df = pd.DataFrame(filtered_locations)
+
+# عرض تحليل الخدمات المختارة
+if not filtered_services_df.empty:
+    st.write(f"### 🏥 عدد {selected_services_ar[0]} داخل {radius_km} كم: {len(filtered_services_df)}")
+    st.dataframe(filtered_services_df[['Name', 'المسافة (كم)']], use_container_width=True)
+else:
+    st.warning(f"🚨 لا توجد {selected_services_ar[0]} داخل هذا النطاق!")
+
+# البحث عن الشقق القريبة بناءً على الخدمات المحددة
+if not filtered_services_df.empty:
+    apartments_tree = cKDTree(df_apartments[["latitude", "longitude"]].values)
     
-    # تحويل النطاق إلى نطاق بحث فعلي بالأمتار
     radius = radius_km / 111  # تحويل من كم إلى درجات جغرافية
+    nearest_indices = apartments_tree.query_ball_point(filtered_services_df[["Latitude", "Longitude"]].values, r=radius)
     
-    # البحث عن الشقق القريبة لكل خدمة
-    nearest_indices = apartments_tree.query_ball_point(filtered_services[["Latitude", "Longitude"]].values, r=radius)
-    
-    # استخراج الشقق القريبة
     nearby_apartments = df_apartments.iloc[[idx for sublist in nearest_indices for idx in sublist]]
-    
-    # إزالة التكرارات
     nearby_apartments = nearby_apartments.drop_duplicates(subset=["room_id"])
     
-    # عرض النتائج
     if not nearby_apartments.empty:
         st.write("### 🏠 الشقق القريبة من الخدمات المختارة")
         st.dataframe(nearby_apartments[['name', 'price_per_month', 'rating', 'URL']], use_container_width=True)
