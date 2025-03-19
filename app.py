@@ -107,4 +107,60 @@ if "pharmacies" in selected_services:
 
 
 
+if "metro" in selected_services:
+    # 🔹 تصفية محطات المترو داخل النطاق المحدد
+    filtered_metro = []
+    for _, row in df_services[df_services["Category"] == "metro"].iterrows():
+        metro_location = (row["Latitude"], row["Longitude"])
+        distance = geodesic(user_location, metro_location).km
+        if distance <= radius_km:
+            row_dict = row.to_dict()
+            row_dict["المسافة (كم)"] = round(distance, 2)
+            filtered_metro.append(row_dict)
+
+    # 🔹 تحويل القائمة إلى DataFrame
+    filtered_metro_df = pd.DataFrame(filtered_metro)
+
+    # 🔹 الآن يمكن استخدام `filtered_metro_df` بأمان
+    col1, col2 = st.columns([3, 1])
+
+    with col1:
+        st.markdown(f"### 🚉 عدد محطات المترو داخل {radius_km} كم: **{len(filtered_metro_df)}**")
+
+        if filtered_metro_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي محطات مترو داخل هذا النطاق!**  
+                💀 **إذا كنت تعتمد على المترو يوميًا، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                فجأة تحتاج مشوار سريع، وتكتشف أنك عالق في الزحمة 🚗🚦  
+                **تبي تعيش بدون مترو؟ ولا تبي محطة جنب بيتك؟ القرار لك!** 🔥
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_metro_df) == 1:
+            metro = filtered_metro_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد محطات المترو في هذا النطاق: 1 فقط!**  
+                📍 **المحطة الوحيدة هنا هي:** `{metro['Name']}` وتبعد عنك **{metro['المسافة (كم)']} كم!**  
+                🚆 **إذا كنت تعتمد على المترو يوميًا، فكر مرتين قبل تسكن هنا، لأن المحطة الوحيدة قد تكون بعيدة وقت الحاجة!** 😬
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد محطات المترو داخل {radius_km} كم: {len(filtered_metro_df)} 🚆**  
+                👏 **تقدر تطمن!** لو احتجت المترو في أي وقت، عندك خيارات متاحة لك 😉  
+                📍 **عندك عدة محطات مترو حولك، وما تحتاج تفكر في الزحمة!** 🚄💨
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🚉 أقرب 3 محطات مترو إليك:")
+            closest_metro = filtered_metro_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_metro.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع محطات المترو**
+            if len(filtered_metro_df) > 3:
+                with st.expander("🔍 عرض جميع محطات المترو"):
+                    st.dataframe(filtered_metro_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل صورة لمحطات المترو
+        st.image("Metro.webp", use_container_width=True)
 
