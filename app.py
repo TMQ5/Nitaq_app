@@ -26,7 +26,7 @@ with st.sidebar:
     
     # اختيار الخدمات المفضلة
     services_file = "merged_places.xlsx"
-    df_services = pd.read_excel(services_file, sheet_name='Sheet1')
+    df_services = pd.read_excel(services_file, sheet_name='Sheet1', engine="openpyxl")
     
     # تحويل أسماء الفئات إلى العربية
     category_translation = {
@@ -52,7 +52,8 @@ with st.sidebar:
 
 # تحميل بيانات الشقق
 apartments_file = "Cleaned_airbnb_v1.xlsx"
-df_apartments = pd.read_excel(apartments_file, sheet_name='Sheet1')
+df_apartments = pd.read_excel(apartments_file, sheet_name='Sheet1', engine="openpyxl")
+
 
 # الاحتفاظ فقط بالأعمدة المهمة
 df_services = df_services[['Name', 'Category', 'Longitude', 'Latitude']]
