@@ -88,16 +88,16 @@ with col1:
             👏 **تقدر تطمن!** لو احتجت بانادول في نص الليل، فيه خيارات متاحة لك 😉  
             📍 **عندك عدة صيدليات حولك، وما يحتاج تطق مشوار طويل عشان تجيب دواء بسيط!** 🚗💨
         """, unsafe_allow_html=True)
+        # 🔹 **عرض أقرب 3 صيدليات**
+       st.markdown("### 🏥 أقرب 3 صيدليات إليك:")
+       closest_pharmacies = filtered_pharmacies_df.nsmallest(3, "المسافة (كم)")
+       for _, row in closest_pharmacies.iterrows():
+            st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
 
 with col2:
     # تحميل الصورة
     st.image("Pharmacy.webp", use_column_width=True)
 
-    # 🔹 **عرض أقرب 3 صيدليات**
-    st.markdown("### 🏥 أقرب 3 صيدليات إليك:")
-    closest_pharmacies = filtered_pharmacies_df.nsmallest(3, "المسافة (كم)")
-    for _, row in closest_pharmacies.iterrows():
-        st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
 
     # 🔹 **إضافة زر لعرض جميع الصيدليات**
     if len(filtered_pharmacies_df) > 3:
