@@ -5,3 +5,8 @@ scipy
 pillow
 openpyxl
 googlesearch-python
+st_folium
+PIL
+folium
+math
+geopy
