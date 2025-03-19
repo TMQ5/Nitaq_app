@@ -26,10 +26,10 @@ user_location = (user_lat, user_lon)
 radius_km = st.slider("نطاق البحث (كم):", min_value=1.0, max_value=15.0, value=5.0, step=0.5)
 
     # 🔹 اختيار الخدمات المفضلة
-    services_file = "merged_places.xlsx"
-    df_services = pd.read_excel(services_file, sheet_name='Sheet1', engine="openpyxl")
+services_file = "merged_places.xlsx"
+df_services = pd.read_excel(services_file, sheet_name='Sheet1', engine="openpyxl")
 
-    category_translation = {
+category_translation = {
         "malls": "المولات",
         "entertainment": "الترفيه",
         "hospitals_clinics": "المستشفيات والعيادات",
@@ -42,13 +42,13 @@ radius_km = st.slider("نطاق البحث (كم):", min_value=1.0, max_value=15
         "restaurants": "المطاعم"
     }
 
-    df_services['Category_Arabic'] = df_services['Category'].map(category_translation)
-    service_types = df_services['Category_Arabic'].dropna().unique().tolist()
+df_services['Category_Arabic'] = df_services['Category'].map(category_translation)
+service_types = df_services['Category_Arabic'].dropna().unique().tolist()
 
-    selected_services_ar = st.multiselect("اختر الخدمات المفضلة:", service_types, default=service_types[:1] if service_types else [])
+selected_services_ar = st.multiselect("اختر الخدمات المفضلة:", service_types, default=service_types[:1] if service_types else [])
 
     # تحويل الاختيارات العربية إلى الأصلية لاستخدامها في التصفية
-    selected_services = [key for key, value in category_translation.items() if value in selected_services_ar]
+selected_services = [key for key, value in category_translation.items() if value in selected_services_ar]
 
 # 🔹 تحميل بيانات الصيدليات فقط
 df_pharmacies = df_services[df_services["Category"] == "pharmacies"]
@@ -648,43 +648,3 @@ if "bus" in selected_services:
 
 
 
-
-
-# -------------------------------------------------------------
-# 🔹 تحميل بيانات الشقق
-apartments_file = "Cleaned_airbnb_v1.xlsx"
-df_apartments = pd.read_excel(apartments_file, sheet_name='Sheet1', engine="openpyxl")
-
-df_apartments = df_apartments[['room_id', 'name', 'price_per_month', 'rating', 'latitude', 'longitude', 'URL']]
-
-# 🔹 تصفية الشقق بناءً على الخدمات المحددة
-filtered_services = df_services[df_services["Category"].isin(selected_services)]
-
-if not filtered_services.empty:
-    # 🔹 بناء شجرة KDTree للبحث عن الشقق القريبة
-    apartments_tree = cKDTree(df_apartments[["latitude", "longitude"]].values)
-
-    # 🔹 تحويل نطاق البحث إلى درجات جغرافية
-    radius = radius_km / 111
-
-    # 🔹 البحث عن الشقق القريبة لكل خدمة
-    nearest_indices = apartments_tree.query_ball_point(filtered_services[["Latitude", "Longitude"]].values, r=radius)
-
-    # 🔹 استخراج الشقق القريبة
-    nearby_apartments = df_apartments.iloc[[idx for sublist in nearest_indices for idx in sublist]]
-
-    # 🔹 إزالة التكرارات
-    nearby_apartments = nearby_apartments.drop_duplicates(subset=["room_id"])
-
-    # 🔹 عرض الشقق القريبة
-    if not nearby_apartments.empty:
-        st.write("### 🏠 الشقق القريبة من الخدمات المختارة")
-        st.dataframe(nearby_apartments[['name', 'price_per_month', 'rating', 'URL']], use_container_width=True)
-    else:
-        st.warning("لم يتم العثور على شقق بالقرب من الخدمات المختارة. جرب توسيع نطاق البحث أو اختيار خدمات أخرى.")
-else:
-    st.warning("يرجى اختيار خدمات للبحث عن الشقق القريبة منها.")
-
-# 🔹 زر تأكيد الموقع
-if st.button("تأكيد الموقع"):
-    st.success("تم تأكيد الموقع! (الميزة التالية قيد التطوير)")
