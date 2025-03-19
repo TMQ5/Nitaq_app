@@ -162,6 +162,66 @@ if "metro" in selected_services:
         # تحميل صورة لمحطات المترو
         st.image("Metro.webp", use_container_width=True)
 
+
+# 🔹 تحميل بيانات الأندية الرياضية فقط
+if "gyms" in selected_services:
+    df_gyms = df_services[df_services["Category"] == "gyms"]
+
+    # 🔹 حساب المسافات للأندية الرياضية
+    filtered_gyms = []
+    for _, row in df_gyms.iterrows():
+        gym_location = (row["Latitude"], row["Longitude"])
+        distance = geodesic(user_location, gym_location).km
+        if distance <= radius_km:
+            row_dict = row.to_dict()
+            row_dict["المسافة (كم)"] = round(distance, 2)
+            filtered_gyms.append(row_dict)
+
+    filtered_gyms_df = pd.DataFrame(filtered_gyms)
+
+    # 🔹 تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])
+
+    with col1:
+        st.markdown(f"### 🏋️‍♂️ عدد الأندية الرياضية داخل {radius_km} كم: **{len(filtered_gyms_df)}**")
+
+        if filtered_gyms_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي أندية رياضية داخل هذا النطاق!**  
+                💀 **إذا كنت ناوي تصير فتنس مود، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                بتضطر تتمرن في البيت مع فيديوهات يوتيوب، لأن النادي بعيد جدًا! 🚶‍♂️💨  
+                **تبي نادي قريب، ولا تكتفي بتمارين الضغط في الصالة؟ القرار لك!** 🔥
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_gyms_df) == 1:
+            gym = filtered_gyms_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد الأندية الرياضية في هذا النطاق: 1 فقط!**  
+                📍 **النادي الوحيد هنا هو:** `{gym['Name']}` وتبعد عنك **{gym['المسافة (كم)']} كم!**  
+                🏋️‍♂️ *يعني لو كان زحمة، ما عندك خيارات ثانية! لازم تستحمل الانتظار على الأجهزة الرياضية!* 😬  
+                **هل أنت مستعد لهذا التحدي؟**
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد الأندية الرياضية داخل {radius_km} كم: {len(filtered_gyms_df)} 🏋️‍♂️**  
+                👏 *هنيالك! عندك أكثر من خيار، وتقدر تختار النادي اللي يناسبك بدون عناء!* 😉  
+                📍 *ما يحتاج تتمرن في البيت، عندك أندية قريبة توفر لك كل شيء تحتاجه!* 💪🔥
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🏋️‍♂️ أقرب 3 أندية رياضية إليك:")
+            closest_gyms = filtered_gyms_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_gyms.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع الأندية**
+            if len(filtered_gyms_df) > 3:
+                with st.expander("🔍 عرض جميع الأندية"):
+                    st.dataframe(filtered_gyms_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة
+        st.image("GYM.webp", use_container_width=True)
 # 🔹 تحميل بيانات الشقق
 apartments_file = "Cleaned_airbnb_v1.xlsx"
 df_apartments = pd.read_excel(apartments_file, sheet_name='Sheet1', engine="openpyxl")
