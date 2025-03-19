@@ -80,13 +80,6 @@ df_services = pd.read_excel(services_file, sheet_name='Sheet1', engine="openpyxl
 # 🔹 تصفية الصيدليات فقط
 df_services = df_services[df_services["Category"] == "pharmacies"]
 
-# 🔹 إدخال بيانات الموقع يدويًا
-user_lat = st.number_input("خط العرض:", value=24.7136, format="%.6f")
-user_lon = st.number_input("خط الطول:", value=46.6753, format="%.6f")
-user_location = (user_lat, user_lon)
-
-radius_km = st.slider("نطاق البحث (كم):", min_value=1.0, max_value=15.0, value=5.0, step=0.5)
-
 # 🔹 حساب المسافة وتصنيف الصيدليات
 filtered_pharmacies = []
 for _, row in df_services.iterrows():
