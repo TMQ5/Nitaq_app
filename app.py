@@ -8,7 +8,7 @@ def set_background(image_url):
         f"""
         <style>
         .stApp {{
-            background: url("{image_url}") no-repeat center center fixed;
+            background: url("{https://imgur.com/a/NyZC7sx}") no-repeat center center fixed;
             background-size: cover;
         }}
         </style>
