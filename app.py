@@ -405,6 +405,65 @@ if "groceries" in selected_services:
         st.image("supermarket.webp", use_container_width=True)
 
 
+# 🔹 تصفية بيانات أماكن الترفيه
+df_entertainment = df_services[df_services["Category"] == "entertainment"]
+
+# 🔹 حساب المسافات لأماكن الترفيه
+filtered_entertainment = []
+for _, row in df_entertainment.iterrows():
+    entertainment_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, entertainment_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_entertainment.append(row_dict)
+
+filtered_entertainment_df = pd.DataFrame(filtered_entertainment)
+
+# 🔹 عرض إحصائيات أماكن الترفيه فقط إذا تم اختيارها
+if "entertainment" in selected_services:
+    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+
+    with col1:
+        st.markdown(f"### 🎭 عدد أماكن الترفيه داخل {radius_km} كم: **{len(filtered_entertainment_df)}**")
+
+        if filtered_entertainment_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي أماكن ترفيه داخل هذا النطاق!**  
+                💀 **إذا كنت تحب الطلعات والأماكن الحماسية، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                **يعني لا سينما، لا ملاهي، لا جلسات حلوة؟! الحياة بتكون مملة جدًا! 😭**
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_entertainment_df) == 1:
+            entertainment = filtered_entertainment_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد أماكن الترفيه في هذا النطاق: 1 فقط!**  
+                📍 **المكان الوحيد هنا هو:** `{entertainment['Name']}` وتبعد عنك **{entertainment['المسافة (كم)']} كم!**  
+                🎢 **يعني لو طفشت، عندك خيار واحد فقط! تحب تكرر نفس المشوار؟ ولا تفضل يكون عندك تنوع؟** 🤔
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد أماكن الترفيه داخل {radius_km} كم: {len(filtered_entertainment_df)} 🎢🎭**  
+                👏 **يا حظك! عندك أماكن كثيرة للترفيه، يعني ما فيه ملل أبد!** 😍  
+                📍 **إذا كنت تحب السينما، الألعاب، أو الجلسات الممتعة، تقدر تخطط لطلعات بدون تفكير!** 🍿🎮
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🎭 أقرب 3 أماكن ترفيه إليك:")
+            closest_entertainment = filtered_entertainment_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_entertainment.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع أماكن الترفيه**
+            if len(filtered_entertainment_df) > 3:
+                with st.expander("🔍 عرض جميع أماكن الترفيه"):
+                    st.dataframe(filtered_entertainment_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة الخاصة بأماكن الترفيه
+        st.image("Event.webp", use_container_width=True)
+
 
 # -------------------------------------------------------------
 # 🔹 تحميل بيانات الشقق
