@@ -8,7 +8,7 @@ def set_background(image_url):
         f"""
         <style>
         .stApp {{
-            background: url("{https://imgur.com/a/NyZC7sx}") no-repeat center center fixed;
+            background: url("{image_url}") no-repeat center center fixed;
             background-size: cover;
         }}
         </style>
@@ -17,7 +17,7 @@ def set_background(image_url):
     )
 
 # ✅ استدعاء الدالة مع رابط الصورة الخلفية
-set_background("https://your-image-url.com/background.jpg")
+set_background("https://imgur.com/8eMtSD3")
 
 # 🔹 إعداد الصفحة
 st.set_page_config(
