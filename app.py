@@ -20,14 +20,14 @@ st.set_page_config(
 with st.sidebar:
     st.image('logo.png', use_container_width=True)
     st.header("🔍 خيارات البحث")
-    
+
     # نطاق البحث كشريط تمرير بين 0 و15 كم بفواصل 0.5 كم
     radius_km = st.slider("نطاق البحث (كم):", min_value=0.0, max_value=15.0, value=5.0, step=0.5)
-    
+
     # اختيار الخدمات المفضلة من ملف merged_places.xlsx
     services_file = "merged_places.xlsx"
     df_services = pd.read_excel(services_file, sheet_name='Sheet1')
-    
+
     # تحويل أسماء الفئات إلى العربية
     category_translation = {
         "malls": "المولات",
@@ -120,12 +120,12 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
         popup=f"الإحداثيات المختارة\nنصف قطر البحث: {radius_km} كم",
         icon=folium.Icon(color="red", icon="info-sign")
     ).add_to(m)
-    
+
     # السماح للمستخدم باختيار فئات الخدمات من بيانات الأماكن
     st.subheader("اختر نوع الخدمة (يمكن اختيار أكثر من نوع):")
     categories = sorted(places_df["Category"].unique())
     st.session_state["selected_categories"] = st.multiselect("اختر نوع الخدمة:", categories)
-    
+
     if st.session_state["selected_categories"]:
         # حساب المنطقة الجغرافية (bounding box) لتصفية الأماكن
         lat_deg = radius_km / 111.0
@@ -134,7 +134,7 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
         lat_max = user_location[0] + lat_deg
         lon_min = user_location[1] - lon_deg
         lon_max = user_location[1] + lon_deg
-        
+
         mask_bbox = (
             (places_df["Latitude"] >= lat_min) &
             (places_df["Latitude"] <= lat_max) &
@@ -142,7 +142,7 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
             (places_df["Longitude"] <= lon_max)
         )
         places_in_bbox = places_df[mask_bbox]
-        
+
         # تصفية الأماكن بناءً على المسافة والفئة المختارة
         filtered_places = []
         for _, row in places_in_bbox.iterrows():
@@ -152,7 +152,7 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
                 row_dict = row.to_dict()
                 row_dict["Distance (km)"] = round(distance_km_calc, 2)
                 filtered_places.append(row_dict)
-        
+
         # إضافة علامات الأماكن المصفاة على الخريطة
         for place in filtered_places:
             category = place["Category"]
@@ -208,7 +208,7 @@ else:
 filtered_pharmacies = []
 for _, row in pharmacies_df.iterrows():
     pharmacy_location = (row["Latitude"], row["Longitude"])
-    distance = geodesic(user_location, pharmacy_location).km  
+    distance = geodesic(user_location, pharmacy_location).km
     if distance <= radius_km:
         row_dict = row.to_dict()
         row_dict["Distance (km)"] = round(distance, 2)
@@ -216,7 +216,7 @@ for _, row in pharmacies_df.iterrows():
 filtered_pharmacies_df = pd.DataFrame(filtered_pharmacies)
 
 # تعديل مسار الصورة لتكون نسبية (يُفترض أن الصورة "Pharmacy.webp" موجودة في نفس مجلد التطبيق)
-image_path = "Pharmacy.webp"  
+image_path = "Pharmacy.webp"
 
 html_content = f"""
 <style>
@@ -331,11 +331,11 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
     radius_conv = radius_km / 111
     nearest_indices = apartments_tree.query_ball_point([[st.session_state["clicked_lat"], st.session_state["clicked_lng"]]], r=radius_conv)[0]
     nearby_apartments = df_apartments.iloc[nearest_indices].drop_duplicates(subset=["room_id"])
-    
+
     if not nearby_apartments.empty:
         st.write("### 🏠 الشقق القريبة من الموقع المختار")
         st.dataframe(nearby_apartments[['name', 'price_per_month', 'rating', 'URL']], use_container_width=True)
-        
+
         fig = px.scatter_mapbox(nearby_apartments,
                                 lat="latitude", lon="longitude",
                                 hover_name="name",
