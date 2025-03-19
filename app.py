@@ -16,7 +16,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# تحميل صورة الشعار وعرضه في الشريط الجانبي
+# تحميل صورة الشعار وعرضها في الشريط الجانبي
 with st.sidebar:
     st.image('logo.png', use_container_width=True)
     st.header("🔍 خيارات البحث")
@@ -57,9 +57,9 @@ df_apartments = df_apartments[['room_id', 'name', 'price_per_month', 'rating', '
 st.markdown(
     """
     <div class='main-content'>
-    <h1>طريقك لإيجاد نطاقك المفضّل في الرياض!</h1>
-    <p style="font-size: 1.5rem; font-weight: bold;">مرحبًا بك في تطبيق <strong>نِطاق</strong>!</p>
-    <p>نساعدك في استكشاف الرياض والعثور على النّـطاق المثالي الذي يناسبك، بناءً على المعالم والخدمات القريبة منك.</p>
+      <h1>طريقك لإيجاد نطاقك المفضّل في الرياض!</h1>
+      <p style="font-size: 1.5rem; font-weight: bold;">مرحبًا بك في تطبيق <strong>نِطاق</strong>!</p>
+      <p>نساعدك في استكشاف الرياض والعثور على النّـطاق المثالي الذي يناسبك، بناءً على المعالم والخدمات القريبة منك.</p>
     </div>
     """,
     unsafe_allow_html=True
@@ -187,7 +187,7 @@ if returned_data and returned_data["last_clicked"] is not None:
 
 # قسم عرض بيانات الصيدليات بتنسيق HTML باستخدام st.markdown
 # التأكد من تعريف pharmacies_df، user_location، ونطاق البحث (radius_km)
-# إذا لم تكن معرفّة، نقوم بتعريف مثال وهمي:
+# إذا لم تكن معرفة، نقوم بتعريف مثال وهمي:
 if "pharmacies_df" not in st.session_state:
     data = {
         "Name": ["صيدلية ألف", "صيدلية باء", "صيدلية جيم"],
@@ -311,12 +311,12 @@ html_content += f"""
 <script>
     function showMore() {{
         document.getElementById('hidden-pharmacies').classList.remove('hidden');
-        document.querySelector('.btn.hidden').classList.remove('hidden');
         document.querySelector('button[onclick="showMore()"]').classList.add('hidden');
+        document.querySelector('button[onclick="showLess()"]').classList.remove('hidden');
     }}
     function showLess() {{
         document.getElementById('hidden-pharmacies').classList.add('hidden');
-        document.querySelector('.btn.hidden').classList.add('hidden');
+        document.querySelector('button[onclick="showLess()"]').classList.add('hidden');
         document.querySelector('button[onclick="showMore()"]').classList.remove('hidden');
     }}
 </script>
