@@ -75,7 +75,7 @@ st.markdown(
 
 @st.cache_data
 
-places_df = pd.read_excel("Riyadh_data.xlsx")
+places_df = pd.read_excel("Riyadh_data.xlsx", engine="openpyxl")
 
 
 # تحديث مسار ملف بيانات الأماكن حسب الحاجة
