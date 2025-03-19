@@ -4,10 +4,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 from scipy.spatial import cKDTree
 from PIL import Image
-from streamlit_folium import st_folium
-import folium
-import math
-from geopy.distance import geodesic
 
 # إعداد صفحة التطبيق
 st.set_page_config(
@@ -23,6 +19,10 @@ with st.sidebar:
     
     # نطاق البحث كـ شريط تمرير بين 0 و 15 كم بفواصل 0.5 كم
     radius_km = st.slider("نطاق البحث (كم):", min_value=0.0, max_value=15.0, value=5.0, step=0.5)
+    
+    # إدخال إحداثيات الموقع يدويًا
+    user_lat = st.number_input("خط العرض:", value=24.7136, format="%.6f")
+    user_lon = st.number_input("خط الطول:", value=46.6753, format="%.6f")
     
     # اختيار الخدمات المفضلة
     services_file = "merged_places.xlsx"
@@ -69,63 +69,33 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# === إضافة الخريطة التفاعلية ===
-if "clicked_lat" not in st.session_state:
-    st.session_state["clicked_lat"] = None
-if "clicked_lng" not in st.session_state:
-    st.session_state["clicked_lng"] = None
+# تصفية الخدمات بناءً على اختيار المستخدم
+filtered_services = df_services[df_services["Category"].isin(selected_services)]
 
-riyadh_center = [24.7136, 46.6753]
-m = folium.Map(location=riyadh_center, zoom_start=12)
-
-if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
-    user_location = (st.session_state["clicked_lat"], st.session_state["clicked_lng"])
-    folium.Circle(
-        location=user_location,
-        radius=radius_km * 1000,
-        color="blue",
-        fill=True,
-        fill_color="blue",
-        fill_opacity=0.2
-    ).add_to(m)
-    folium.Marker(
-        location=user_location,
-        popup=f"الإحداثيات المختارة\nنصف قطر البحث: {radius_km} كم",
-        icon=folium.Icon(color="red", icon="info-sign")
-    ).add_to(m)
-
-returned_data = st_folium(m, width=700, height=500, key="map")
-
-if returned_data and returned_data["last_clicked"] is not None:
-    lat = returned_data["last_clicked"]["lat"]
-    lon = returned_data["last_clicked"]["lng"]
-    if 16 <= lat <= 32 and 34 <= lon <= 56:
-        st.session_state["clicked_lat"] = lat
-        st.session_state["clicked_lng"] = lon
-    else:
-        st.warning("يبدو أن الإحداثيات خارج حدود السعودية. انقر ضمن الخريطة في نطاق السعودية.")
-
-# تصفية الشقق بناءً على الموقع المختار
-if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
-    user_location = (st.session_state["clicked_lat"], st.session_state["clicked_lng"])
-    apartments_tree = cKDTree(df_apartments[["latitude", "longitude"]].values)
-    radius = radius_km / 111
-    nearest_indices = apartments_tree.query_ball_point([[st.session_state["clicked_lat"], st.session_state["clicked_lng"]]], r=radius)[0]
-    nearby_apartments = df_apartments.iloc[nearest_indices].drop_duplicates(subset=["room_id"])
+if not filtered_services.empty:
+    # بناء شجرة KDTree لتسريع البحث عن الشقق القريبة
+    apartments_tree = cKDTree(df_apartments[["latitude", "longitude"].values])
     
+    # تحويل النطاق إلى نطاق بحث فعلي بالأمتار
+    radius = radius_km / 111  # تحويل من كم إلى درجات جغرافية
+    
+    # البحث عن الشقق القريبة لكل خدمة
+    nearest_indices = apartments_tree.query_ball_point(filtered_services[["Latitude", "Longitude"]].values, r=radius)
+    
+    # استخراج الشقق القريبة
+    nearby_apartments = df_apartments.iloc[[idx for sublist in nearest_indices for idx in sublist]]
+    
+    # إزالة التكرارات
+    nearby_apartments = nearby_apartments.drop_duplicates(subset=["room_id"])
+    
+    # عرض النتائج
     if not nearby_apartments.empty:
-        st.write("### 🏠 الشقق القريبة من الموقع المختار")
+        st.write("### 🏠 الشقق القريبة من الخدمات المختارة")
         st.dataframe(nearby_apartments[['name', 'price_per_month', 'rating', 'URL']], use_container_width=True)
-        
-        fig = px.scatter_mapbox(nearby_apartments,
-                                lat="latitude", lon="longitude",
-                                hover_name="name",
-                                hover_data=["price_per_month", "rating"],
-                                zoom=12, height=500)
-        fig.update_layout(mapbox_style="open-street-map")
-        st.plotly_chart(fig, use_container_width=True)
     else:
-        st.warning("لم يتم العثور على شقق بالقرب من الموقع المختار. جرب توسيع نطاق البحث.")
+        st.warning("لم يتم العثور على شقق بالقرب من الخدمات المختارة. جرب توسيع نطاق البحث أو اختيار خدمات أخرى.")
+else:
+    st.warning("يرجى اختيار خدمات للبحث عن الشقق القريبة منها.")
 
 # زر تأكيد الموقع
 if st.button("تأكيد الموقع"):
