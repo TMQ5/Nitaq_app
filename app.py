@@ -75,7 +75,8 @@ filtered_services = df_services[df_services["Category"].isin(selected_services)]
 
 if not filtered_services.empty:
     # بناء شجرة KDTree لتسريع البحث عن الشقق القريبة
-    apartments_tree = cKDTree(df_apartments[["latitude", "longitude"].values])
+    apartments_tree = cKDTree(df_apartments[["latitude", "longitude"]].values)
+
     
     # تحويل النطاق إلى نطاق بحث فعلي بالأمتار
     radius = radius_km / 111  # تحويل من كم إلى درجات جغرافية
