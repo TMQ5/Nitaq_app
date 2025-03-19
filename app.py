@@ -465,6 +465,189 @@ if "entertainment" in selected_services:
         st.image("Event.webp", use_container_width=True)
 
 
+# 🔹 تصفية بيانات المقاهي والمخابز
+df_cafes_bakeries = df_services[df_services["Category"] == "cafes_bakeries"]
+
+# 🔹 حساب المسافات للمقاهي والمخابز
+filtered_cafes_bakeries = []
+for _, row in df_cafes_bakeries.iterrows():
+    cafe_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, cafe_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_cafes_bakeries.append(row_dict)
+
+filtered_cafes_bakeries_df = pd.DataFrame(filtered_cafes_bakeries)
+
+# 🔹 عرض إحصائيات المقاهي والمخابز فقط إذا تم اختيارها
+if "cafes_bakeries" in selected_services:
+    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+
+    with col1:
+        st.markdown(f"### ☕ عدد المقاهي والمخابز داخل {radius_km} كم: **{len(filtered_cafes_bakeries_df)}**")
+
+        if filtered_cafes_bakeries_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي مقاهي أو مخابز داخل هذا النطاق!**  
+                💀 **إذا كنت من مدمني القهوة أو عاشق الدونات، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                **يعني لا كابتشينو صباحي؟ لا كرواسون طازج؟ بتعيش حياة جافة جدًا! 😭☕🥐**
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_cafes_bakeries_df) == 1:
+            cafe = filtered_cafes_bakeries_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد المقاهي والمخابز في هذا النطاق: 1 فقط!**  
+                📍 **المكان الوحيد هنا هو:** `{cafe['Name']}` وتبعد عنك **{cafe['المسافة (كم)']} كم!**  
+                ☕ **يعني لو طفشت من نفس المقهى، ما عندك غيره! تحب تكرر نفس القهوة كل يوم؟ ولا تفضّل تنوع؟** 🤔
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد المقاهي والمخابز داخل {radius_km} كم: {len(filtered_cafes_bakeries_df)} ☕🍩**  
+                👏 **أنت في نعيم! عندك مقاهي ومخابز كثيرة، يعني صباحاتك بتكون مثالية وكل يوم تجرب شيء جديد!** 😍  
+                📍 **سواء تحب اللاتيه، الإسبريسو، أو الدونات، الخيارات عندك كثيرة!** 🥐☕
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🍩 أقرب 3 مقاهي ومخابز إليك:")
+            closest_cafes_bakeries = filtered_cafes_bakeries_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_cafes_bakeries.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع المقاهي والمخابز**
+            if len(filtered_cafes_bakeries_df) > 3:
+                with st.expander("🔍 عرض جميع المقاهي والمخابز"):
+                    st.dataframe(filtered_cafes_bakeries_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة الخاصة بالمقاهي والمخابز
+        st.image("Cafe.webp", use_container_width=True)
+
+
+# 🔹 تصفية بيانات المطاعم
+df_restaurants = df_services[df_services["Category"] == "restaurants"]
+
+# 🔹 حساب المسافات للمطاعم
+filtered_restaurants = []
+for _, row in df_restaurants.iterrows():
+    restaurant_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, restaurant_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_restaurants.append(row_dict)
+
+filtered_restaurants_df = pd.DataFrame(filtered_restaurants)
+
+# 🔹 عرض إحصائيات المطاعم فقط إذا تم اختيارها
+if "restaurants" in selected_services:
+    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+
+    with col1:
+        st.markdown(f"### 🍽️ عدد المطاعم داخل {radius_km} كم: **{len(filtered_restaurants_df)}**")
+
+        if filtered_restaurants_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي مطاعم داخل هذا النطاق!**  
+                💀 **إذا كنت تعتمد على المطاعم وما تطبخ، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                **يعني لا برجر، لا بيتزا، لا شاورما؟ بتعيش على النودلز والبيض المقلي؟ 🥲🍳**
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_restaurants_df) == 1:
+            restaurant = filtered_restaurants_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد المطاعم في هذا النطاق: 1 فقط!**  
+                📍 **المطعم الوحيد هنا هو:** `{restaurant['Name']}` وتبعد عنك **{restaurant['المسافة (كم)']} كم!**  
+                🍽️ **يعني لو ما عجبك، مالك إلا تطبخ بنفسك! تبي تعيش على منيو محدود؟ ولا تفضل يكون عندك تنوع؟** 🤔
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد المطاعم داخل {radius_km} كم: {len(filtered_restaurants_df)} 🍔🍕**  
+                👏 **هنيالك! عندك مطاعم كثيرة، يعني خياراتك مفتوحة سواء تبغى شاورما، سوشي، ولا مندي!** 😍  
+                📍 **كل يوم تقدر تجرب مطعم جديد، وما فيه ملل أبد!** 🍛🍣
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🍔 أقرب 3 مطاعم إليك:")
+            closest_restaurants = filtered_restaurants_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_restaurants.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع المطاعم**
+            if len(filtered_restaurants_df) > 3:
+                with st.expander("🔍 عرض جميع المطاعم"):
+                    st.dataframe(filtered_restaurants_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة الخاصة بالمطاعم
+        st.image("restaurant.webp", use_container_width=True)
+
+
+# 🔹 تصفية بيانات محطات الباص
+df_bus_stations = df_services[df_services["Category"] == "bus"]
+
+# 🔹 حساب المسافات لمحطات الباص
+filtered_bus_stations = []
+for _, row in df_bus_stations.iterrows():
+    bus_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, bus_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_bus_stations.append(row_dict)
+
+filtered_bus_stations_df = pd.DataFrame(filtered_bus_stations)
+
+# 🔹 عرض إحصائيات محطات الباص فقط إذا تم اختيارها
+if "bus" in selected_services:
+    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+
+    with col1:
+        st.markdown(f"### 🚌 عدد محطات الباص داخل {radius_km} كم: **{len(filtered_bus_stations_df)}**")
+
+        if filtered_bus_stations_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي محطات باص داخل هذا النطاق!**  
+                💀 **إذا كنت تعتمد على الباصات في تنقلاتك، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                **يعني لازم تمشي مشوار محترم عشان تلقى محطة؟ بتصير خبير في المشي بالغصب! 🚶‍♂️😂**
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_bus_stations_df) == 1:
+            bus_station = filtered_bus_stations_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد محطات الباص في هذا النطاق: 1 فقط!**  
+                📍 **المحطة الوحيدة هنا هي:** `{bus_station['Name']}` وتبعد عنك **{bus_station['المسافة (كم)']} كم!**  
+                🚌 *🚏 يعني لو فاتك الباص، لا تشيل هم، بعد ٦ دقايق بيجيك الثاني! بس المشكلة؟ إذا كانت المحطة بعيدة، بتتمشى مشوار محترم كل مرة! 😬 تبي تعتمد على محطة وحدة؟ ولا تفضل يكون عندك خيارات أقرب؟* 🤔
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد محطات الباص داخل {radius_km} كم: {len(filtered_bus_stations_df)} 🚌🚏**  
+                👏 **يا سلام! عندك محطات باص كثيرة، تنقلاتك صارت سهلة وما تحتاج تنتظر طويل!** 😍  
+                📍 **ما تحتاج تمشي كثير، أقرب محطة جنبك، ومستعد تنطلق لمشاويرك!** 🚍💨
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🚏 أقرب 3 محطات باص إليك:")
+            closest_bus_stations = filtered_bus_stations_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_bus_stations.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع محطات الباص**
+            if len(filtered_bus_stations_df) > 3:
+                with st.expander("🔍 عرض جميع محطات الباص"):
+                    st.dataframe(filtered_bus_stations_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة الخاصة بمحطات الباص
+        st.image("bus.webp", use_container_width=True)
+
+
+
+
+
 # -------------------------------------------------------------
 # 🔹 تحميل بيانات الشقق
 apartments_file = "Cleaned_airbnb_v1.xlsx"
