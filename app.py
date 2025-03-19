@@ -74,8 +74,8 @@ st.markdown(
 # (هذا هو الجزء الجديد الذي يعرض الأماكن مع ألوان وأيقونات متعددة)
 
 @st.cache_data
-
-places_df = pd.read_excel("Riyadh_data.xlsx", engine="openpyxl")
+def load_places_data(path):
+    return pd.read_excel(path, engine="openpyxl")
 
 
 # تحديث مسار ملف بيانات الأماكن حسب الحاجة
