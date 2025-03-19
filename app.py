@@ -102,8 +102,7 @@ with col1:
 
 with col2:
     # تحميل الصورة
-    st.image("Pharmacy.webp", use_column_width=True)
-
+    st.image("Pharmacy.webp", use_container_width=True)
 
 
 
