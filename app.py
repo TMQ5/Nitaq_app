@@ -2,6 +2,13 @@ import streamlit as st
 import pandas as pd
 from geopy.distance import geodesic
 from scipy.spatial import cKDTree
+# ✅ يجب أن يكون هذا أول أمر يتم تنفيذه
+
+# 🔹 إعداد الصفحة
+st.set_page_config(
+    page_title="طريقك لإيجاد نِطاقك المفضّل في الرياض",
+    layout="wide"
+)
 
 def set_background(image_url):
     st.markdown(
@@ -19,11 +26,6 @@ def set_background(image_url):
 # ✅ استدعاء الدالة مع رابط الصورة الخلفية
 set_background("https://imgur.com/a/NyZC7sx")
 
-# 🔹 إعداد الصفحة
-st.set_page_config(
-    page_title="طريقك لإيجاد نِطاقك المفضّل في الرياض",
-    layout="wide"
-)
 
 # 🔹 تحميل الشعار في الشريط الجانبي
 with st.sidebar:
