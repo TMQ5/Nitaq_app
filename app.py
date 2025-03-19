@@ -44,13 +44,13 @@ st.markdown(
 
 st.header("🔍 خيارات البحث")
     
-    # 🔹 إدخال الإحداثيات مرة واحدة فقط
-    user_lat = st.number_input("خط العرض:", value=24.7136, format="%.6f")
-    user_lon = st.number_input("خط الطول:", value=46.6753, format="%.6f")
-    user_location = (user_lat, user_lon)
+# 🔹 إدخال الإحداثيات مرة واحدة فقط
+user_lat = st.number_input("خط العرض:", value=24.7136, format="%.6f")
+user_lon = st.number_input("خط الطول:", value=46.6753, format="%.6f")
+user_location = (user_lat, user_lon)
 
     # 🔹 تحديد نطاق البحث
-    radius_km = st.slider("نطاق البحث (كم):", min_value=1.0, max_value=15.0, value=5.0, step=0.5)
+radius_km = st.slider("نطاق البحث (كم):", min_value=1.0, max_value=15.0, value=5.0, step=0.5)
 
     # 🔹 اختيار الخدمات المفضلة
     services_file = "merged_places.xlsx"
