@@ -30,6 +30,18 @@ set_background("https://i.postimg.cc/25sXRVNQ/image.jpg")
 with st.sidebar:
     st.image('logo.png', use_container_width=True)
 
+st.markdown(
+    """
+    <style>
+    [data-testid="stSidebar"] img {
+        filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.2)); /* إضافة ظل خفيف */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
     st.header("🔍 خيارات البحث")
     
     # 🔹 إدخال الإحداثيات مرة واحدة فقط
