@@ -16,22 +16,21 @@ st.markdown(
     <style>
     /* تغيير لون الشريط المنزلق (Slider) */
     [data-testid="stSlider"] .st-dn {
-        background-color: #D9C5A2 !important; /* ضع هنا كود اللون الجديد */
+        background-color: #D9C5A2 !important; /* اللون الجديد للخلفية */
     }
     [data-testid="stSlider"] .st-c1 {
-        color: #BFBFBF !important; /* لتغيير لون النص فوق الشريط */
+        color: #BFBFBF !important; /* تغيير لون النص فوق الشريط */
     }
 
     /* تغيير لون التحديد في Multiselect */
     [data-baseweb="tag"] {
-        background-color: #BFBFBF !important; /* ضع هنا كود اللون الجديد */
+        background-color: #BFBFBF !important; /* اللون الجديد للخلفية */
         color: black !important; /* اجعل النص واضحًا */
     }
     </style>
     """,
     unsafe_allow_html=True
 )
-
 
 # 🔹 تحميل الشعار في الشريط الجانبي
 with st.sidebar:
