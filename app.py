@@ -23,7 +23,8 @@ with st.sidebar:
     # إدخال إحداثيات الموقع يدويًا
     user_lat = st.number_input("خط العرض:", value=24.7136, format="%.6f")
     user_lon = st.number_input("خط الطول:", value=46.6753, format="%.6f")
-    
+    user_location = (user_lat, user_lon)
+
     # اختيار الخدمات المفضلة
     services_file = "merged_places.xlsx"
     df_services = pd.read_excel(services_file, sheet_name='Sheet1', engine="openpyxl")
