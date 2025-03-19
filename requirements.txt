@@ -10,3 +10,4 @@ PIL
 folium
 math
 geopy
+streamlit-folium  
