@@ -24,7 +24,7 @@ def set_background(image_url):
     )
 
 # ✅ استدعاء الدالة مع رابط الصورة الخلفية
-set_background("https://imgur.com/a/NyZC7sx")
+set_background("[img]https://i.imgur.com/8eMtSD3.jpeg[/img]")
 
 
 # 🔹 تحميل الشعار في الشريط الجانبي
