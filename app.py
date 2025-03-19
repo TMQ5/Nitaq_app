@@ -9,37 +9,10 @@ st.set_page_config(
     layout="wide"
 )
 
-def set_background(image_url):
-    st.markdown(
-        f"""
-        <style>
-        .stApp {{
-            background: url("{image_url}") no-repeat center center fixed;
-            background-size: cover;
-        }}
-        </style>
-        """,
-        unsafe_allow_html=True
-    )
-
-# ✅ استدعاء الدالة مع رابط الصورة الخلفية
-set_background("https://i.postimg.cc/25sXRVNQ/image.jpg")
-
 
 # 🔹 تحميل الشعار في الشريط الجانبي
 with st.sidebar:
     st.image('logo.png', use_container_width=True)
-
-st.markdown(
-    """
-    <style>
-    [data-testid="stSidebar"] img {
-        filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.2)); /* إضافة ظل خفيف */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
 
 
 st.header("🔍 خيارات البحث")
