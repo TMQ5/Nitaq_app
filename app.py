@@ -27,7 +27,7 @@ with st.sidebar:
     # اختيار الخدمات المفضلة
     services_file = "merged_places.xlsx"
     df_services = pd.read_excel(services_file, sheet_name='Sheet1')
-    service_types = df_services['Type_of_Utility'].unique().tolist()
+    service_types = df_services['Category'].unique().tolist()
     selected_services = st.multiselect("اختر الخدمات المفضلة:", service_types, default=[service_types[0]])
 
 # تحميل بيانات الشقق
