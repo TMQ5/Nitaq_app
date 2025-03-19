@@ -3,6 +3,22 @@ import pandas as pd
 from geopy.distance import geodesic
 from scipy.spatial import cKDTree
 
+def set_background(image_url):
+    st.markdown(
+        f"""
+        <style>
+        .stApp {{
+            background: url("{image_url}") no-repeat center center fixed;
+            background-size: cover;
+        }}
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+# ✅ استدعاء الدالة مع رابط الصورة الخلفية
+set_background("https://your-image-url.com/background.jpg")
+
 # 🔹 إعداد الصفحة
 st.set_page_config(
     page_title="طريقك لإيجاد نِطاقك المفضّل في الرياض",
