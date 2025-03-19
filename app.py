@@ -74,12 +74,9 @@ st.markdown(
 # (هذا هو الجزء الجديد الذي يعرض الأماكن مع ألوان وأيقونات متعددة)
 
 @st.cache_data
-def load_places_data(path):
-    with open(path, 'rb') as f:
-        raw_data = f.read(10000)  # قراءة عينة من الملف
-        result = chardet.detect(raw_data)
-        encoding_type = result['encoding']
-    return pd.read_csv(path, encoding=encoding_type)
+
+places_df = pd.read_excel("Riyadh_data.xlsx")
+
 
 # تحديث مسار ملف بيانات الأماكن حسب الحاجة
 places_file_path = "Riyadh_data.xlsx"
