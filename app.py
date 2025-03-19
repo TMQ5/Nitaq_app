@@ -13,7 +13,7 @@ st.set_page_config(
 
 # تحميل صورة الشعار وعرضه في الشريط الجانبي في المنتصف
 with st.sidebar:
-    st.image('logo.png', use_column_width=True)
+    st.image('logo.png', use_container_width=True)
     
     st.header("🔍 خيارات البحث")
     
@@ -71,7 +71,7 @@ if not filtered_services.empty:
     # عرض النتائج
     if not nearby_apartments.empty:
         st.write("### 🏠 الشقق القريبة من الخدمات المختارة")
-        st.dataframe(nearby_apartments[['name', 'price_per_month', 'rating', 'URL']])
+        st.dataframe(nearby_apartments[['name', 'price_per_month', 'rating', 'URL']], use_container_width=True)
         
         # عرض الشقق على الخريطة
         fig = px.scatter_mapbox(nearby_apartments,
