@@ -215,8 +215,8 @@ for _, row in pharmacies_df.iterrows():
         filtered_pharmacies.append(row_dict)
 filtered_pharmacies_df = pd.DataFrame(filtered_pharmacies)
 
-# تحديد مسار الصورة (تأكد من صحة المسار حسب بيئتك)
-image_path = "/content/Pharmacy.webp"  
+# تعديل مسار الصورة لتكون نسبية (تأكد من رفع الصورة "Pharmacy.webp" في نفس مجلد التطبيق)
+image_path = "Pharmacy.webp"  
 
 html_content = f"""
 <style>
