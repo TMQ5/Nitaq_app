@@ -1,10 +1,9 @@
-import streamlit as st
+import streamlit as st  
 import pandas as pd
 from geopy.distance import geodesic
 from scipy.spatial import cKDTree
-# ✅ يجب أن يكون هذا أول أمر يتم تنفيذه
 
-# 🔹 إعداد الصفحة
+# ✅ يجب أن يكون هذا أول أمر يتم تنفيذه
 st.set_page_config(
     page_title="طريقك لإيجاد نِطاقك المفضّل في الرياض",
     layout="wide"
