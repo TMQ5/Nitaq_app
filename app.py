@@ -79,9 +79,9 @@ def load_places_data(path):
 
 
 # تحديث مسار ملف بيانات الأماكن حسب الحاجة
-places_file_path = "Riyadh_data.xlsx"
+path = "Riyadh_data.xlsx"
 try:
-    places_df = load_places_data(places_file_path)
+    places_df = load_places_data(path)
     st.success("تم تحميل بيانات الخدمات بنجاح!")
 except Exception as e:
     st.error(f"حدث خطأ أثناء تحميل الملف: {e}")
