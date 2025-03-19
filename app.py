@@ -16,7 +16,7 @@ st.markdown(
     <style>
     /* تغيير لون الشريط المنزلق (Slider) */
     [data-testid="stSlider"] .st-dn {
-        background-color: #BFBFBF !important; /* ضع هنا كود اللون الجديد */
+        background-color: #D9C5A2 !important; /* ضع هنا كود اللون الجديد */
     }
     [data-testid="stSlider"] .st-c1 {
         color: #BFBFBF !important; /* لتغيير لون النص فوق الشريط */
