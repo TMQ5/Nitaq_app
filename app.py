@@ -198,6 +198,143 @@ if returned_data and returned_data["last_clicked"] is not None:
 
 # ===== نهاية كود الخرائط التفاعلية =====
 
+import streamlit as st
+import pandas as pd
+from geopy.distance import geodesic
+
+# افتراض أن لديك DataFrame للصيدليات (pharmacies_df)، 
+# وموقع المستخدم (user_location) ونطاق البحث (radius_km) معرفين مسبقًا.
+# على سبيل المثال:
+# pharmacies_df = pd.read_csv("pharmacies.csv")
+# user_location = (24.7136, 46.6753)
+# radius_km = 5
+
+filtered_pharmacies = []
+for _, row in pharmacies_df.iterrows():
+    pharmacy_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, pharmacy_location).km  
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["Distance (km)"] = round(distance, 2)
+        filtered_pharmacies.append(row_dict)
+
+filtered_pharmacies_df = pd.DataFrame(filtered_pharmacies)
+
+# مسار الصورة (يمكنك تعديل المسار حسب موقع الصورة)
+image_path = "/content/Pharmacy.webp"  
+
+html_content = f"""
+<style>
+    .container {{
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }}
+    .stats {{
+        width: 60%;
+        font-size: 16px;
+        line-height: 1.6;
+    }}
+    .stats strong {{
+        color: #D72638;
+    }}
+    .image {{
+        width: 35%;
+        text-align: right;
+    }}
+    img {{
+        max-width: 100%;
+        border-radius: 10px;
+    }}
+    .hidden {{
+        display: none;
+    }}
+    .pharmacy-list li {{
+        margin-bottom: 5px;
+    }}
+    .btn {{
+        background-color: #007BFF;
+        color: white;
+        padding: 8px 12px;
+        border: none;
+        cursor: pointer;
+        margin-top: 10px;
+        border-radius: 5px;
+    }}
+    .btn:hover {{
+        background-color: #0056b3;
+    }}
+</style>
+
+<div class="container">
+    <div class="stats">
+"""
+
+if filtered_pharmacies_df.empty:
+    html_content += """
+        <h2>🚨 لا توجد أي صيدليات داخل هذا النطاق!</h2>
+        <p>💀 <strong>إذا مفاصلك تعبانة أو تحتاج دواء يومي، فكر مليون مرة قبل تسكن هنا!</strong> 😵‍💫 <br>
+        فجأة يهجم عليك صداع، تدور بانادول… وما تلاقي إلا مشوار طويل بانتظارك! 🚗 <br>
+        <strong>تبي مغامرة يومية للبحث عن صيدلية؟ ولا تبي صيدلية جنب البقالة؟ القرار لك!</strong> 🔥</p>
+    """
+elif len(filtered_pharmacies_df) == 1:
+    pharmacy = filtered_pharmacies_df.iloc[0]
+    html_content += f"""
+        <h2>⚠️ عدد الصيدليات في هذا النطاق: 1 فقط!</h2>
+        <p>📍 <strong>الصيدلية الوحيدة هنا هي:</strong> {pharmacy['Name']} وتبعد عنك <strong>{pharmacy['Distance (km)']} كم!</strong></p>
+        <p>💊 <strong>إذا كنت شخص يعتمد على الأدوية اليومية أو عندك إصابات متكررة، فكر مرتين قبل تسكن هنا، لأن الصيدلية الوحيدة ممكن تكون مغلقة وقت الحاجة!</strong> 😬</p>
+    """
+else:
+    html_content += f"""
+        <h2>📊 عدد الصيدليات داخل {radius_km} كم: {len(filtered_pharmacies_df)} 💊</h2>
+        <p>👏 <strong>تقدر تطمن!</strong> لو احتجت بانادول في نص الليل، فيه خيارات متاحة لك. 😉 <br>
+        📍 عندك عدة صيدليات حولك، وما يحتاج تطق مشوار طويل عشان تجيب دواء بسيط! 🚗💨</p>
+        <h3>🏥 أقرب 3 صيدليات إليك:</h3>
+        <ul id="pharmacy-list" class="pharmacy-list">
+    """
+    for i, row in filtered_pharmacies_df.head(3).iterrows():
+        html_content += f"<li>🔹 {row['Name']} - تبعد {row['Distance (km)']} كم</li>"
+
+    html_content += """
+        </ul>
+        <button class="btn" onclick="showMore()">عرض الكل</button>
+        <button class="btn hidden" onclick="showLess()">إظهار أقل</button>
+        <ul id="hidden-pharmacies" class="pharmacy-list hidden">
+    """
+    
+    for i, row in filtered_pharmacies_df.iloc[3:].iterrows():
+        html_content += f"<li>🔹 {row['Name']} - تبعد {row['Distance (km)']} كم</li>"
+
+    html_content += """
+        </ul>
+    """
+
+html_content += f"""
+    </div>
+    <div class="image">
+        <img src="{image_path}" alt="No Pharmacies Warning">
+    </div>
+</div>
+
+<script>
+    function showMore() {{
+        document.getElementById('hidden-pharmacies').classList.remove('hidden');
+        document.querySelector('.btn.hidden').classList.remove('hidden');
+        document.querySelector('button[onclick="showMore()"]').classList.add('hidden');
+    }}
+    function showLess() {{
+        document.getElementById('hidden-pharmacies').classList.add('hidden');
+        document.querySelector('.btn.hidden').classList.add('hidden');
+        document.querySelector('button[onclick="showMore()"]').classList.remove('hidden');
+    }}
+</script>
+"""
+
+# عرض المحتوى باستخدام streamlit
+st.markdown(html_content, unsafe_allow_html=True)
+
+
+
 # باقي الكود يبقى كما هو (مثلاً تصفية وعرض بيانات الشقق)
 if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
     user_location = (st.session_state["clicked_lat"], st.session_state["clicked_lng"])
