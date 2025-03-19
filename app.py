@@ -283,3 +283,120 @@ if "hospitals_clinics" in selected_services:
     with col2:
         # تحميل الصورة
         st.image("Hospital.webp", use_container_width=True)
+# 🔹 تصفية بيانات المولات
+df_malls = df_services[df_services["Category"] == "malls"]
+
+# 🔹 حساب المسافات للمولات
+filtered_malls = []
+for _, row in df_malls.iterrows():
+    mall_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, mall_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_malls.append(row_dict)
+
+filtered_malls_df = pd.DataFrame(filtered_malls)
+
+# 🔹 عرض إحصائيات المولات فقط إذا تم اختيارها
+if "malls" in selected_services:
+    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+
+    with col1:
+        st.markdown(f"### 🛍️ عدد المولات داخل {radius_km} كم: **{len(filtered_malls_df)}**")
+
+        if filtered_malls_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي مولات داخل هذا النطاق!**  
+                💀 **إذا كنت من محبي التسوق، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                **ما فيه مول قريب؟ يعني لا مقاهي، لا براندات، لا تخفيضات فجائية؟ بتعيش حياة صعبة!** 🥲
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_malls_df) == 1:
+            mall = filtered_malls_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد المولات في هذا النطاق: 1 فقط!**  
+                📍 **المول الوحيد هنا هو:** `{mall['Name']}` وتبعد عنك **{mall['المسافة (كم)']} كم!**  
+                🛍️ **يعني لو كنت تدور على تنوع في المحلات، لا تتحمس… هذا هو خيارك الوحيد!** 😬  
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد المولات داخل {radius_km} كم: {len(filtered_malls_df)} 🛍️✨**  
+                👏 **هنيالك!** إذا طفشت، عندك خيارات كثيرة للشوبينغ، ما يحتاج تسافر بعيد عشان تشتري جزمة جديدة! 😉  
+                📍 **يعني بكل بساطة، خذ راحتك، وجرب أكثر من مول حسب مزاجك!** 💃🕺
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🛒 أقرب 3 مولات إليك:")
+            closest_malls = filtered_malls_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_malls.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع المولات**
+            if len(filtered_malls_df) > 3:
+                with st.expander("🔍 عرض جميع المولات"):
+                    st.dataframe(filtered_malls_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة الخاصة بالمولات
+        st.image("Mall.webp", use_container_width=True)
+
+# 🔹 تصفية بيانات محلات البقالة والسوبرماركت
+df_groceries = df_services[df_services["Category"] == "groceries"]
+
+# 🔹 حساب المسافات لمحلات السوبرماركت
+filtered_groceries = []
+for _, row in df_groceries.iterrows():
+    grocery_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, grocery_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_groceries.append(row_dict)
+
+filtered_groceries_df = pd.DataFrame(filtered_groceries)
+
+# 🔹 عرض إحصائيات السوبرماركت فقط إذا تم اختيارها
+if "groceries" in selected_services:
+    # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
+    col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
+
+    with col1:
+        st.markdown(f"### 🛒 عدد محلات البقالة داخل {radius_km} كم: **{len(filtered_groceries_df)}**")
+
+        if filtered_groceries_df.empty:
+            st.markdown("""
+                🚨 **لا توجد أي محلات بقالة أو سوبرماركت داخل هذا النطاق!**  
+                💀 **إذا كنت من النوع اللي يشتري أكل بيومه، فكر مليون مرة قبل تسكن هنا!** 😵‍💫  
+                **يعني إذا خلصت البيض فجأة؟ لازم مشوار عشان تجيب كرتون جديد!** 🥚🚗
+            """, unsafe_allow_html=True)
+
+        elif len(filtered_groceries_df) == 1:
+            grocery = filtered_groceries_df.iloc[0]
+            st.markdown(f"""
+                ⚠️ **عدد محلات البقالة في هذا النطاق: 1 فقط!**  
+                📍 **المحل الوحيد هنا هو:** `{grocery['Name']}` وتبعد عنك **{grocery['المسافة (كم)']} كم!**  
+                🛒 **يعني إذا كان زحمة، أو سكّر بدري، فأنت في ورطة! جهّز نفسك لطلب التوصيل أو خزن الأكل مسبقًا!** 😬  
+            """, unsafe_allow_html=True)
+
+        else:
+            st.markdown(f"""
+                📊 **عدد محلات البقالة داخل {radius_km} كم: {len(filtered_groceries_df)} 🛒🥦**  
+                👏 **ما يحتاج تشيل هم الأكل، عندك محلات كثيرة تقدر تشتري منها أي وقت!** 😉  
+                📍 **لو نسيت تشتري خبز، ما يحتاج مشوار طويل، أقرب بقالة عندك!** 🍞🥛
+            """, unsafe_allow_html=True)
+
+            st.markdown("### 🛒 أقرب 3 محلات بقالة إليك:")
+            closest_groceries = filtered_groceries_df.nsmallest(3, "المسافة (كم)")
+            for _, row in closest_groceries.iterrows():
+                st.markdown(f"🔹 **{row['Name']}** - تبعد {row['المسافة (كم)']} كم")
+
+            # 🔹 **إضافة زر لعرض جميع محلات البقالة**
+            if len(filtered_groceries_df) > 3:
+                with st.expander("🔍 عرض جميع محلات البقالة"):
+                    st.dataframe(filtered_groceries_df[['Name', 'المسافة (كم)']], use_container_width=True)
+
+    with col2:
+        # تحميل الصورة الخاصة بالسوبرماركت
+        st.image("supermarket.webp", use_container_width=True)
