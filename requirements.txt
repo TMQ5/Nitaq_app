@@ -6,8 +6,6 @@ pillow
 openpyxl
 googlesearch-python
 st_folium
-PIL
 folium
-math
 geopy
-streamlit-folium  
+streamlit-folium
