@@ -8,3 +8,4 @@ googlesearch-python
 folium
 math
 geopy
+chardet
