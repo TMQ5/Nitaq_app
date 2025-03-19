@@ -17,7 +17,7 @@ def set_background(image_url):
     )
 
 # ✅ استدعاء الدالة مع رابط الصورة الخلفية
-set_background("https://imgur.com/8eMtSD3")
+set_background("https://imgur.com/a/NyZC7sx")
 
 # 🔹 إعداد الصفحة
 st.set_page_config(
