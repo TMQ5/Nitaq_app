@@ -16,13 +16,12 @@ st.set_page_config(
     layout="wide"
 )
 
-# تحميل صورة الشعار وعرضه في الشريط الجانبي في المنتصف
+# تحميل صورة الشعار وعرضه في الشريط الجانبي
 with st.sidebar:
     st.image('logo.png', use_container_width=True)
-    
     st.header("🔍 خيارات البحث")
     
-    # نطاق البحث كـ شريط تمرير بين 0 و 15 كم بفواصل 0.5 كم
+    # نطاق البحث كشريط تمرير بين 0 و15 كم بفواصل 0.5 كم
     radius_km = st.slider("نطاق البحث (كم):", min_value=0.0, max_value=15.0, value=5.0, step=0.5)
     
     # اختيار الخدمات المفضلة من ملف merged_places.xlsx
@@ -42,20 +41,16 @@ with st.sidebar:
         "pharmacies": "الصيدليات",
         "restaurants": "المطاعم"
     }
-    
     df_services['Category_Arabic'] = df_services['Category'].map(category_translation)
     service_types = df_services['Category_Arabic'].dropna().unique().tolist()
-    
     selected_services_ar = st.multiselect("اختر الخدمات المفضلة:", service_types, default=service_types[:1] if service_types else [])
-    
-    # تحويل الاختيارات العربية إلى الأصلية لاستخدامها في التصفية
+    # تحويل الاختيارات العربية إلى الأصلية للتصفية
     selected_services = [key for key, value in category_translation.items() if value in selected_services_ar]
 
 # تحميل بيانات الشقق من ملف Cleaned_airbnb_v1.xlsx
 apartments_file = "Cleaned_airbnb_v1.xlsx"
 df_apartments = pd.read_excel(apartments_file, sheet_name='Sheet1')
-
-# الاحتفاظ فقط بالأعمدة المهمة في كلا الملفين
+# الاحتفاظ بالأعمدة المهمة
 df_services = df_services[['Name', 'Category', 'Longitude', 'Latitude']]
 df_apartments = df_apartments[['room_id', 'name', 'price_per_month', 'rating', 'latitude', 'longitude', 'URL']]
 
@@ -70,15 +65,12 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# ===== استبدال كود الخرائط التفاعلية =====
-# (هذا هو الجزء الجديد الذي يعرض الأماكن مع ألوان وأيقونات متعددة)
-
+# ===== قسم خرائط الأماكن =====
 @st.cache_data
 def load_places_data(path):
     return pd.read_excel(path, engine="openpyxl")
 
-
-# تحديث مسار ملف بيانات الأماكن حسب الحاجة
+# تحديد مسار ملف بيانات الأماكن (Riyadh_data.xlsx)
 path = "Riyadh_data.xlsx"
 try:
     places_df = load_places_data(path)
@@ -87,7 +79,7 @@ except Exception as e:
     st.error(f"حدث خطأ أثناء تحميل الملف: {e}")
     st.stop()
 
-# تعريف ألوان وأيقونات العلامات لكل فئة من الخدمات
+# تعريف ألوان وأيقونات العلامات لكل فئة
 category_styles = {
     "cafes_bakeries": {"color": "orange", "icon": "coffee"},
     "entertainment": {"color": "purple", "icon": "film"},
@@ -100,8 +92,7 @@ category_styles = {
     "pharmacies": {"color": "lightblue", "icon": "plus-square"}
 }
 
-# استخدام نفس قيمة الشريط الخاص بنطاق البحث من الشريط الجانبي (radius_km)
-# تهيئة الحالة الخاصة بالإحداثيات عند النقر (إن لم تكن موجودة)
+# تهيئة الحالة الخاصة بالإحداثيات عند النقر
 if "clicked_lat" not in st.session_state:
     st.session_state["clicked_lat"] = None
 if "clicked_lng" not in st.session_state:
@@ -113,7 +104,7 @@ if "selected_categories" not in st.session_state:
 riyadh_center = [24.7136, 46.6753]
 m = folium.Map(location=riyadh_center, zoom_start=12)
 
-# إذا قام المستخدم بالنقر على الخريطة، عرض العلامة والدائرة الخاصة بالموقع المختار
+# إذا قام المستخدم بالنقر على الخريطة، يتم عرض الدائرة والعلامة
 if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
     user_location = (st.session_state["clicked_lat"], st.session_state["clicked_lng"])
     folium.Circle(
@@ -129,22 +120,21 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
         popup=f"الإحداثيات المختارة\nنصف قطر البحث: {radius_km} كم",
         icon=folium.Icon(color="red", icon="info-sign")
     ).add_to(m)
-
+    
     # السماح للمستخدم باختيار فئات الخدمات من بيانات الأماكن
     st.subheader("اختر نوع الخدمة (يمكن اختيار أكثر من نوع):")
     categories = sorted(places_df["Category"].unique())
     st.session_state["selected_categories"] = st.multiselect("اختر نوع الخدمة:", categories)
-
+    
     if st.session_state["selected_categories"]:
         # حساب المنطقة الجغرافية (bounding box) لتصفية الأماكن
         lat_deg = radius_km / 111.0
         lon_deg = radius_km / (111.0 * math.cos(math.radians(user_location[0])))
-
         lat_min = user_location[0] - lat_deg
         lat_max = user_location[0] + lat_deg
         lon_min = user_location[1] - lon_deg
         lon_max = user_location[1] + lon_deg
-
+        
         mask_bbox = (
             (places_df["Latitude"] >= lat_min) &
             (places_df["Latitude"] <= lat_max) &
@@ -152,7 +142,7 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
             (places_df["Longitude"] <= lon_max)
         )
         places_in_bbox = places_df[mask_bbox]
-
+        
         # تصفية الأماكن بناءً على المسافة والفئة المختارة
         filtered_places = []
         for _, row in places_in_bbox.iterrows():
@@ -162,13 +152,12 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
                 row_dict = row.to_dict()
                 row_dict["Distance (km)"] = round(distance_km_calc, 2)
                 filtered_places.append(row_dict)
-
-        # إضافة علامات للأماكن المصفاة مع تنسيق خاص (ألوان وأيقونات)
+        
+        # إضافة علامات الأماكن المصفاة على الخريطة
         for place in filtered_places:
             category = place["Category"]
             marker_color = category_styles.get(category, {}).get("color", "gray")
             marker_icon = category_styles.get(category, {}).get("icon", "info-sign")
-
             popup_content = (
                 f"<b>{place['Name']}</b><br>"
                 f"التصنيف: {place['Category']}<br>"
@@ -183,10 +172,8 @@ if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
                 icon=folium.Icon(color=marker_color, icon=marker_icon)
             ).add_to(m)
 
-# عرض الخريطة والتقاط نقرات المستخدم عليها
+# عرض الخريطة والتقاط نقرات المستخدم
 returned_data = st_folium(m, width=700, height=500, key="map")
-
-# تحديث الحالة الخاصة بالإحداثيات بناءً على آخر نقرة للمستخدم
 if returned_data and returned_data["last_clicked"] is not None:
     lat = returned_data["last_clicked"]["lat"]
     lon = returned_data["last_clicked"]["lng"]
@@ -196,18 +183,27 @@ if returned_data and returned_data["last_clicked"] is not None:
     else:
         st.warning("يبدو أن الإحداثيات خارج حدود السعودية. انقر ضمن الخريطة في نطاق السعودية.")
 
-# ===== نهاية كود الخرائط التفاعلية =====
+# ===== نهاية قسم خرائط الأماكن =====
 
-import streamlit as st
-import pandas as pd
-from geopy.distance import geodesic
+# قسم عرض بيانات الصيدليات بتنسيق HTML باستخدام st.markdown
+# التأكد من تعريف pharmacies_df، user_location، ونطاق البحث (radius_km)
+# إذا لم تكن معرفّة، نقوم بتعريف مثال وهمي:
+if "pharmacies_df" not in st.session_state:
+    data = {
+        "Name": ["صيدلية ألف", "صيدلية باء", "صيدلية جيم"],
+        "Latitude": [24.7136, 24.715, 24.710],
+        "Longitude": [46.6753, 46.678, 46.670]
+    }
+    pharmacies_df = pd.DataFrame(data)
+    st.session_state["pharmacies_df"] = pharmacies_df
+else:
+    pharmacies_df = st.session_state["pharmacies_df"]
 
-# افتراض أن لديك DataFrame للصيدليات (pharmacies_df)، 
-# وموقع المستخدم (user_location) ونطاق البحث (radius_km) معرفين مسبقًا.
-# على سبيل المثال:
-# pharmacies_df = pd.read_csv("pharmacies.csv")
-# user_location = (24.7136, 46.6753)
-# radius_km = 5
+# تحديد موقع المستخدم للصيدليات: إذا لم يتم النقر، نستخدم موقع افتراضي (مركز الرياض)
+if not st.session_state["clicked_lat"] or not st.session_state["clicked_lng"]:
+    user_location = (24.7136, 46.6753)
+else:
+    user_location = (st.session_state["clicked_lat"], st.session_state["clicked_lng"])
 
 filtered_pharmacies = []
 for _, row in pharmacies_df.iterrows():
@@ -217,10 +213,9 @@ for _, row in pharmacies_df.iterrows():
         row_dict = row.to_dict()
         row_dict["Distance (km)"] = round(distance, 2)
         filtered_pharmacies.append(row_dict)
-
 filtered_pharmacies_df = pd.DataFrame(filtered_pharmacies)
 
-# مسار الصورة (يمكنك تعديل المسار حسب موقع الصورة)
+# تحديد مسار الصورة (تأكد من صحة المسار حسب بيئتك)
 image_path = "/content/Pharmacy.webp"  
 
 html_content = f"""
@@ -294,17 +289,14 @@ else:
     """
     for i, row in filtered_pharmacies_df.head(3).iterrows():
         html_content += f"<li>🔹 {row['Name']} - تبعد {row['Distance (km)']} كم</li>"
-
     html_content += """
         </ul>
         <button class="btn" onclick="showMore()">عرض الكل</button>
         <button class="btn hidden" onclick="showLess()">إظهار أقل</button>
         <ul id="hidden-pharmacies" class="pharmacy-list hidden">
     """
-    
     for i, row in filtered_pharmacies_df.iloc[3:].iterrows():
         html_content += f"<li>🔹 {row['Name']} - تبعد {row['Distance (km)']} كم</li>"
-
     html_content += """
         </ul>
     """
@@ -330,12 +322,9 @@ html_content += f"""
 </script>
 """
 
-# عرض المحتوى باستخدام streamlit
 st.markdown(html_content, unsafe_allow_html=True)
 
-
-
-# باقي الكود يبقى كما هو (مثلاً تصفية وعرض بيانات الشقق)
+# قسم عرض بيانات الشقق (يظل كما هو)
 if st.session_state["clicked_lat"] and st.session_state["clicked_lng"]:
     user_location = (st.session_state["clicked_lat"], st.session_state["clicked_lng"])
     apartments_tree = cKDTree(df_apartments[["latitude", "longitude"]].values)
