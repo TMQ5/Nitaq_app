@@ -226,6 +226,21 @@ if "gyms" in selected_services:
 
 
 # 🔹 عرض إحصائيات المستشفيات فقط إذا تم اختيارها
+# 🔹 تصفية بيانات المستشفيات
+df_hospitals = df_services[df_services["Category"] == "hospitals_clinics"]
+
+# 🔹 حساب المسافات للمستشفيات
+filtered_hospitals = []
+for _, row in df_hospitals.iterrows():
+    hospital_location = (row["Latitude"], row["Longitude"])
+    distance = geodesic(user_location, hospital_location).km
+    if distance <= radius_km:
+        row_dict = row.to_dict()
+        row_dict["المسافة (كم)"] = round(distance, 2)
+        filtered_hospitals.append(row_dict)
+
+filtered_hospitals_df = pd.DataFrame(filtered_hospitals)
+
 if "hospitals_clinics" in selected_services:
     # تقسيم الصفحة إلى عمودين: النص في اليسار والصورة في اليمين
     col1, col2 = st.columns([3, 1])  # العمود الأول أكبر ليحتوي على النص
