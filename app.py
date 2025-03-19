@@ -82,7 +82,7 @@ def load_places_data(path):
     return pd.read_csv(path, encoding=encoding_type)
 
 # تحديث مسار ملف بيانات الأماكن حسب الحاجة
-places_file_path = "C:\\Users\\ish3e\\Downloads\\CapStone\\Riyadh_data.csv"
+places_file_path = "Riyadh_data.csv"
 try:
     places_df = load_places_data(places_file_path)
     st.success("تم تحميل بيانات الخدمات بنجاح!")
