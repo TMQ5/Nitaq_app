@@ -9,6 +9,30 @@ st.set_page_config(
     layout="wide"
 )
 
+
+# 🔹 تغيير ألوان الشريط المنزلق وتحديد الخيارات
+st.markdown(
+    """
+    <style>
+    /* تغيير لون الشريط المنزلق (Slider) */
+    [data-testid="stSlider"] .st-dn {
+        background-color: #BFBFBF !important; /* ضع هنا كود اللون الجديد */
+    }
+    [data-testid="stSlider"] .st-c1 {
+        color: #BFBFBF !important; /* لتغيير لون النص فوق الشريط */
+    }
+
+    /* تغيير لون التحديد في Multiselect */
+    [data-baseweb="tag"] {
+        background-color: #BFBFBF !important; /* ضع هنا كود اللون الجديد */
+        color: black !important; /* اجعل النص واضحًا */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 # 🔹 تحميل الشعار في الشريط الجانبي
 with st.sidebar:
     st.image('logo.png', use_container_width=True)
